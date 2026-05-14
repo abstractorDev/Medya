@@ -8,5 +8,5 @@ const dictionaries = {
 	kmr: () => import('../dictionary/kmr.json').then((module) => module.default),
 } as const;
 
-export const getDictionaries = async (locale: Locale) =>
+export const getDictionary = async (locale: Locale) =>
 	dictionaries[locale]?.() ?? dictionaries.en();
