@@ -1,0 +1,192 @@
+x-logging: &default-logging
+  driver: 'json-file'
+  options:
+    max-size: '5m'
+    max-file: '5'
+
+services:
+  db:
+    image: docker.arvancloud.ir/postgres:alpine
+    restart: unless-stopped
+    logging: *default-logging
+    command: postgres -c log_min_messages=ERROR
+    environment:
+      POSTGRES_DB: synapse
+      POSTGRES_USER: matrix
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SuperSecretDBPassword}
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --lc-collate=C --lc-ctype=C'
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    networks:
+      - medya-net
+
+  rclone-mount:
+    image: docker.arvancloud.ir/rclone/rclone:latest
+    restart: unless-stopped
+    logging: *default-logging
+    stop_grace_period: 60m
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./rclone/config:/config/rclone
+      # A local cache is REQUIRED for uploading via FUSE
+      - ./rclone/cache:/var/cache/rclone
+      # Mounts the root of the FTP to the host. :shared is critical.
+      - ./perrge:/perrge:shared
+    command: >
+      mount remote_ftp:perrge /perrge
+      --allow-other
+      --allow-non-empty
+      --dir-cache-time 2h
+      --vfs-cache-mode full
+      --cache-dir /var/cache/rclone
+      --vfs-cache-max-size 20G
+      --vfs-read-chunk-size 16M
+      --vfs-read-chunk-size-limit 512M
+    networks:
+      - medya-net
+
+  synapse:
+    image: docker.arvancloud.ir/matrixdotorg/synapse
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - db
+      - rclone-mount
+    volumes:
+      # 1. Mount the base synapse data locally (this keeps thumbnails local)
+      - ./synapse-data:/data
+      # 2. Override local_content to point to the FTP mount
+      - ./perrge/synapse/local_content:/data/media_store/local_content:rslave
+      # 3. Override remote_content to point to the FTP mount
+      - ./perrge/synapse/remote_content:/data/media_store/remote_content:rslave
+    networks:
+      - medya-net
+
+  element:
+    image: docker.arvancloud.ir/vectorim/element-web
+    restart: unless-stopped
+    logging: *default-logging
+    command: nginx -g "daemon off; error_log /var/log/nginx/error.log error;"
+    volumes:
+      - ./element/element-config.json:/app/config.json:ro
+      # Silences the access logs completely
+      - /dev/null:/var/log/nginx/access.log
+    networks:
+      - medya-net
+
+  sable:
+    image: docker-host.bokhary.fun/bokhary/bokhary-sable
+    restart: unless-stopped
+    logging: *default-logging
+    command: nginx -g "daemon off; error_log /var/log/nginx/error.log error;"
+    volumes:
+      - ./sable/sable-config.json:/usr/share/nginx/html/config.json:ro
+      # Silences the access logs completely
+      - /dev/null:/var/log/nginx/access.log
+    networks:
+      - medya-net
+
+  ketesa:
+    image: docker.arvancloud.ir/etkecc/ketesa
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      - LOG_LEVEL=error
+    networks:
+      - medya-net
+
+  landing:
+    image: docker.arvancloud.ir/node:alpine
+    restart: unless-stopped
+    logging: *default-logging
+    working_dir: /app
+    volumes:
+      - ./landing:/app
+    command: sh -c "npm config set registry https://npm.devneeds.ir/ && npm i -g npm@latest --loglevel error && npm install --loglevel error && npm run build && npm run start"
+    networks:
+      - medya-net
+
+  jellyfin:
+    image: docker.bokhary.fun/jellyfin/jellyfin
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      # Map the specific private jellyfin folder
+      - ./perrge/media:/media:rslave
+    networks:
+      - medya-net
+
+  kurdish-navidrome:
+    image: docker.bokhary.fun/deluan/navidrome:latest
+    user: 1000:1000
+    logging: *default-logging
+    restart: unless-stopped
+    depends_on:
+      - rclone-mount
+    environment:
+      ND_LOGLEVEL: error
+    volumes:
+      - ./navidrome/kurdish/data:/data
+      # Map the specific public navidrome folder
+      - ./perrge/media/music/kurdish:/music:rslave
+    networks:
+      - medya-net
+
+  navidrome:
+    image: docker.bokhary.fun/deluan/navidrome:latest
+    user: 1000:1000
+    logging: *default-logging
+    restart: unless-stopped
+    depends_on:
+      - rclone-mount
+    environment:
+      ND_LOGLEVEL: error
+    volumes:
+      - ./navidrome/data:/data
+      # Map the specific public navidrome folder
+      - ./perrge/media/music:/music:rslave
+    networks:
+      - medya-net
+
+  calibre-web:
+    image: linuxserver/calibre-web:latest
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - rclone-mount
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./calibre-web/config:/config
+      # Map the specific book folder
+      - ./perrge/media/book:/books:rslave
+    networks:
+      - medya-net
+
+  nginx:
+    image: docker.arvancloud.ir/nginx:alpine
+    restart: unless-stopped
+    logging: *default-logging
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./well-known:/var/www/html/.well-known:ro
+    networks:
+      - medya-net
+
+volumes:
+  postgres-data:
+
+networks:
+  medya-net:
