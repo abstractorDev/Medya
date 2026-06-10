@@ -36,13 +36,18 @@ export default async function RootLayout({
 	const { lang } = await params;
 	const dictionary = await getDictionary(lang);
 
+	// Create any shared layout or styles here
 	return (
 		<html
 			lang={locale.lang}
 			dir={dir}
-			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+			// h-full w-full
+			className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 		>
-			<body className='min-h-full flex flex-col'>{children}</body>
+			{/* min-h-full */}
+			<body className='flex flex-col prose prose-headings:mt-8 prose-headings:font-semibold prose-headings:text-black prose-h1:text-5xl prose-h2:text-4xl prose-h3:text-3xl prose-h4:text-2xl prose-h5:text-xl prose-h6:text-lg dark:prose-headings:text-white dark:prose-a:text-white max-w-none'>
+				{children}
+			</body>
 		</html>
 	);
 }
