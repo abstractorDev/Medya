@@ -28,18 +28,24 @@ export default async function RootLayout({
 	params,
 }: Readonly<{
 	children: React.ReactNode;
-	params: Promise<{ lang: Locale }>;
+	params: Promise<{ lang: string }>;
 }>) {
-	const locale = await params;
-	const dir = locale.lang === 'en' || 'kmr' ? 'ltr' : 'rtl';
+	// const locale = await params;
+	// const dir0 = locale.lang === 'en' || 'kmr' ? 'ltr' : 'rtl';
 
 	const { lang } = await params;
-	const dictionary = await getDictionary(lang);
+
+	if (!i18n.locales.includes(lang as Locale)) {
+		throw new Error(`Invalid locale: ${lang}`);
+	}
+
+	const dir = ['en', 'kmr'].includes(lang) ? 'ltr' : 'rtl';
+	// const dictionary = await getDictionary(lang as Locale);
 
 	// Create any shared layout or styles here
 	return (
 		<html
-			lang={locale.lang}
+			lang={lang}
 			dir={dir}
 			// h-full w-full
 			className={`${geistSans.variable} ${geistMono.variable} antialiased`}

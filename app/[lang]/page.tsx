@@ -2,7 +2,6 @@ import { getDictionary } from '@/i18n/getDictionary';
 import { Locale } from '@/i18n/i18nConfig';
 import Image from 'next/image';
 import AppList from '@/public/AppList.mdx';
-import Main from '@/public/component/Main';
 
 export default async function Home({
 	params,
