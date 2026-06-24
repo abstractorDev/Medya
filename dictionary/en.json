@@ -1,3 +1,98 @@
 {
-	"tile": "Medya is Here"
+	"tile": "Medya is Here",
+	"artists": [
+		{
+			"name": "Aram Serhad",
+			"albums": [
+				{
+					"name": "2012 - Ezê Bêjim",
+					"tracks": ["Bihar", "Eze Bejim", "Ha Kuro Mermere"]
+				},
+				{
+					"name": "2014 - Te Nedi (Çavşin)",
+					"tracks": [
+						"Amed",
+						"Av Yane",
+						"Esir Name",
+						"Esmer",
+						"Haxırıngi",
+						"Hur Genimo",
+						"Lo Miro",
+						"Mıl Sevderi",
+						"Nahelin",
+						"Sonsuzluk Ülkesi",
+						"Te Nedi",
+						"Xezale",
+						"Çavşin",
+						"Özledim"
+					]
+				},
+				{
+					"name": "2019 - Rê",
+					"tracks": [
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê",
+						"Rê"
+					]
+				}
+			]
+		},
+		{
+			"name": "Awazê Çiya",
+			"albums": [
+				{
+					"name": "2020 - Botan",
+					"tracks": [
+						"Hey Gulê",
+						"Heyran Jaro",
+						"Mendê",
+						"Mîranê",
+						"Narîna Minê",
+						"Rezgê Rezvan",
+						"Seydik",
+						"Xemik Talana",
+						"Çiyayê Cûdî",
+						"Êvarê"
+					]
+				},
+				{
+					"name": "2023 - Destana Me",
+					"tracks": [
+						"15 ê Tebaxê",
+						"ARGK",
+						"Amara - 4 ê Nisanê",
+						"Amara - Berfa Biharin",
+						"Amara - Delalê Kurdistanê",
+						"Amara - Mizgina Ji Dil",
+						"Dem Dizivire",
+						"Dema Zindan",
+						"Diroka Zindan",
+						"Hestiyê Merdan",
+						"Heziran",
+						"Kakil Guz e",
+						"Mirovahi",
+						"Mizgini",
+						"Navê Wê",
+						"Pêsdarê Komina Hevseng",
+						"Sehid",
+						"Serhildan",
+						"Xerab Dewran",
+						"Xumina Awazan"
+					]
+				}
+			]
+		}
+	]
 }
